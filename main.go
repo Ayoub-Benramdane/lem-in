@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -41,7 +42,6 @@ func tointeg(lay []string) (Room, error) {
 	return rtn, nil
 }
 
-// Read the input file and initialize the ant farm structure
 func readInput(filename string) (AntFarm, error) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -115,28 +115,6 @@ func readInput(filename string) (AntFarm, error) {
 	return af, nil
 }
 
-// Display the ant farm information
-// func (af AntFarm) display() {
-// 	fmt.Println(af.ants)
-// 	for _, room := range af.rooms {
-// 		fmt.Printf("%s %d %d\n", room.name, room.x, room.y)
-// 	}
-// 	for _, tunnel := range af.tunnels {
-// 		fmt.Printf("%s-%s\n", tunnel.from, tunnel.to)
-// 	}
-// }
-
-// func howpath(rrm []Tunnel,star string) int {
-// 	rtn := 0
-// 	// var pa []string
-// 	for i:= 0 ;i<len(rrm);i++{
-// 		if star == rrm[i].from || star == rrm[i].to {
-// 			rtn++
-// 		}
-// 	}
-// 	return rtn
-// }
-
 func contains(arr []string, str string) bool {
 	for _, v := range arr {
 		if v == str {
@@ -148,35 +126,13 @@ func contains(arr []string, str string) bool {
 
 var paths [][]string
 
-func smalest(pt *[][]string) []string {
-	s := 0
-	ix := -1
-	for i := 0; i < len(*pt); i++ {
-		fmt.Println(pt, (*pt)[i], i, "looool")
-		if s == 0 && len((*pt)[i]) > 0 && check(pt, (*pt)[i]) == 1 {
-			s = len((*pt)[i])
-			ix = i
-		}
-		if len((*pt)[i]) < s && len((*pt)[i]) != 0 {
-			s = len((*pt)[i])
-			ix = i
-		}
-	}
-	if ix == -1 {
-		return nil
-	}
-	sm := make([]string, len((*pt)[ix]))
-	copy(sm, (*pt)[ix])
-	(*pt)[ix] = []string{}
-	return sm
-}
-
-func check(npt *[][]string, sli []string) int {
+func check(npt *[][]string, sli []string, index int) int {
 	count := 0
 	for i := 0; i < len(*npt); i++ {
 		for j := 1; j < len(sli)-1; j++ {
 			for k := 1; k < len((*npt)[i])-1; k++ {
-				if sli[j] == (*npt)[i][k] {
+				if sli[j] == (*npt)[i][k] && index != i {
+					fmt.Println(sli[j], (*npt)[i][k], sli)
 					count++
 				}
 			}
@@ -187,20 +143,14 @@ func check(npt *[][]string, sli []string) int {
 }
 
 func bestpath(pt [][]string) [][]string {
-	var npt [][]string
+	// var npt [][]string
+	sort.Slice(pt, func(i, j int) bool {
+		return len(pt[i]) < len(pt[j])
+	})
 	for i := 0; i < len(pt); i++ {
-		sli := smalest(&pt)
-		fmt.Println(sli, "lool")
-		if sli == nil {
-			return npt
-		}
-		// if check(&npt, sli) == 1 {
-			cp := make([]string, len(sli))
-			copy(cp, sli)
-			npt = append(npt, cp)
-		// }
+		check(&pt, pt[i], i)
 	}
-	return npt
+	return pt
 }
 
 func getpaths(af []Tunnel, start string, end string, pa []string) {
@@ -219,81 +169,6 @@ func getpaths(af []Tunnel, start string, end string, pa []string) {
 	}
 }
 
-func total(nbr int, best [][]string) []int {
-	var ants []int
-	for o := 0; o < len(best); o++ {
-		ants = append(ants, 0)
-	}
-
-	for i := 0; i < nbr; i++ {
-		c := 0
-		for l := 0; l < len(best); l++ {
-			if ants[l]+len(best[l]) < ants[c]+len(best[c]) {
-				c = l
-			}
-		}
-		ants[c]++
-	}
-	return ants
-}
-
-func antrun(antf AntFarm, best [][]string) {
-	ants := total(antf.ants, best)
-	fmt.Println(ants, best)
-
-	// first := 1
-
-	// for i := antf.ants;i>0;{
-	// 	a := (antf.ants - i) + 1
-	// 	for j:= 0;j < len(best) ; j++{
-	// 		lol := len(best)
-	// 		for an:= 0;an <  {
-
-	// 		}
-	// 		// fmt.Println(len(ants))
-	// 		// os.Exit(0)
-	// 		// fmt.Println(ants)
-	// 		for u:= ants[j][0];u> ants[j][1] && u>= 1 ;u-- {
-	// 			fmt.Printf("L%d-%s ",a,best[j][u])
-	// 		}
-	// 		ants[j][0]++
-	// 		ants[j][1]++	// first := 1
-
-	// for i := antf.ants;i>0;{
-	// 	a := (antf.ants - i) + 1
-	// 	for j:= 0;j < len(best) ; j++{
-	// 		lol := len(best)
-	// 		for an:= 0;an <  {
-
-	// 		}
-	// 		// fmt.Println(len(ants))
-	// 		// os.Exit(0)
-	// 		// fmt.Println(ants)
-	// 		for u:= ants[j][0];u> ants[j][1] && u>= 1 ;u-- {
-	// 			fmt.Printf("L%d-%s ",a,best[j][u])
-	// 		}
-	// 		ants[j][0]++
-	// 		ants[j][1]++
-	// 		if ants[j][0] == len(best[j])  {
-	// 			ants[j][0]--
-	// 			i--
-	// 			// a := (antf.ants - i) + 1
-	// 		}
-	// 		// os.Exit(0)
-	// 	}
-	// // 	fmt.Println()
-	// }
-	// 		if ants[j][0] == len(best[j]name)  {
-	// 			ants[j][0]--
-	// 			i--
-	// 			// a := (antf.ants - i) + 1
-	// 		}
-	// 		// os.Exit(0)
-	// 	}
-	// // 	fmt.Println()
-	// }
-}
-
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: go run . <filename>")
@@ -308,8 +183,7 @@ func main() {
 	}
 	var pt []string
 	getpaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, pt)
-	fmt.Println(paths)
+	fmt.Println(paths, "paths")
 	best := bestpath(paths)
-	fmt.Println(best)
-	antrun(antFarm, best)
+	fmt.Println(best, "sort")
 }
