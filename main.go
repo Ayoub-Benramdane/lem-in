@@ -126,31 +126,38 @@ func contains(arr []string, str string) bool {
 
 var paths [][]string
 
-func check(npt *[][]string, sli []string, index int) int {
+func check(mpt *[][]string, npt *[][]string, pt *[][]string, sli []string, index int) {
 	count := 0
-	for i := 0; i < len(*npt); i++ {
+	indexs := []int{}
+	for i := 0; i < len(*pt); i++ {
 		for j := 1; j < len(sli)-1; j++ {
-			for k := 1; k < len((*npt)[i])-1; k++ {
-				if sli[j] == (*npt)[i][k] && index != i {
-					fmt.Println(sli[j], (*npt)[i][k], sli)
+			for k := 1; k < len((*pt)[i])-1; k++ {
+				if sli[j] == (*pt)[i][k] && index != i {
+					indexs = append(indexs, i)
 					count++
 				}
 			}
 		}
 	}
-	fmt.Println(count, sli)
-	return count
+	if count == 0 {
+		*npt = append(*npt, sli)
+	} else if count == 1 && len(indexs) != 0 && len(sli) < len((*pt)[indexs[0]]) {
+		*npt = append(*npt, sli)
+	} else if count != 1 {
+		*mpt = append(*mpt, sli)
+	}
 }
 
 func bestpath(pt [][]string) [][]string {
-	// var npt [][]string
+	var npt [][]string; var mpt [][]string
 	sort.Slice(pt, func(i, j int) bool {
 		return len(pt[i]) < len(pt[j])
 	})
 	for i := 0; i < len(pt); i++ {
-		check(&pt, pt[i], i)
+		check(&mpt, &npt, &pt, pt[i], i)
 	}
-	return pt
+	fmt.Println(mpt, "multip")
+	return npt
 }
 
 func getpaths(af []Tunnel, start string, end string, pa []string) {
@@ -174,7 +181,6 @@ func main() {
 		fmt.Println("Usage: go run . <filename>")
 		return
 	}
-
 	filename := os.Args[1]
 	antFarm, err := readInput(filename)
 	if err != nil {
@@ -185,5 +191,5 @@ func main() {
 	getpaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, pt)
 	fmt.Println(paths, "paths")
 	best := bestpath(paths)
-	fmt.Println(best, "sort")
+	fmt.Println(best, "best")
 }
