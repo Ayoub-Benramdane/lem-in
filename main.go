@@ -148,54 +148,43 @@ func check(mpt *[][]string, npt *[][]string, pt *[][]string, sli []string, index
 		*npt = append(*npt, sli)
 	} else if count == 1 && len(slices) != 0 && len(sli) < len(slices[1]) {
 		*npt = append(*npt, sli)
-	} else if count == 2 {
+	} else if count >= 2 {
 		*mpt = append(*mpt, sli)
-	} else if count > 2 {
-		*pt = append((*pt)[:index], (*pt)[index+1:]...)
-		index--
 	}
 	return index
 }
 
 func checkMultip(pt *[][]string, sli []string, index int) {
 	count := 0
-	valid := false
-	slices := [][]string{sli}
-	indexs := [][]int{}
 	for i := 0; i < len(*pt); i++ {
 		for j := 1; j < len(sli)-1; j++ {
 			for k := 1; k < len((*pt)[i])-1; k++ {
 				if sli[j] == (*pt)[i][k] && index != i {
-					slices = append(slices, (*pt)[i])
+					*pt = append((*pt)[:i], (*pt)[i+1:]...)
+					i--
 					count++
-					valid = true
 				}
-			}
-			if valid {
-				break
 			}
 		}
 	}
-	sort.Slice(slices, func(i, j int) bool {
-		return len(slices[i]) < len(slices[j])
-	})
-	fmt.Println(count, slices, "||||||||||||||")
 }
 
-func bestpath(pt [][]string) [][]string {
+func bestpath(pt [][]string, ants int) [][]string {
 	var npt [][]string
 	var mpt [][]string
 	sort.Slice(pt, func(i, j int) bool {
 		return len(pt[i]) < len(pt[j])
 	})
-	fmt.Println(pt, "sort")
+	// fmt.Println(pt, "sort")
 	for i := 0; i < len(pt); i++ {
 		i = check(&mpt, &npt, &pt, pt[i], i)
 	}
-	fmt.Println(mpt, "multip")
+	// fmt.Println(npt, "best after multip")
+	// fmt.Println(mpt, "multip")
 	for i := 0; i < len(mpt); i++ {
 		checkMultip(&mpt, mpt[i], i)
 	}
+	npt = append(npt, mpt...)
 	return npt
 }
 
@@ -228,7 +217,7 @@ func main() {
 	}
 	var pt []string
 	getpaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, pt)
-	fmt.Println(paths, "paths")
-	best := bestpath(paths)
+	// fmt.Println(paths, "paths")
+	best := bestpath(paths, antFarm.ants)
 	fmt.Println(best, "best")
 }
