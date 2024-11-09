@@ -165,6 +165,17 @@ func checkSlice(gpt *[][][]string, sli []string) bool {
 	return false
 }
 
+func checkSlice1(gpt *[][]string, sli []string) bool {
+	for _, slice := range *gpt {
+		for i := 1; i < len(slice)-1; i++ {
+			if contains(sli, slice[i]) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func slicesEqual(slice1, slice2 []string) bool {
 	if len(slice1) != len(slice2) {
 		return false
@@ -191,7 +202,7 @@ func groupPaths(gpt *[][][]string, sli []string, element string) {
 	*gpt = append(*gpt, [][]string{sli})
 }
 
-func checkMultip(pt *[][]string, gpt *[][][]string, sli []string, index, ants int) {
+func checkMultip(pt *[][]string, gpt *[][][]string, sli []string, index int) {
 	if checkSlice(gpt, sli) {
 		return
 	}
@@ -207,40 +218,59 @@ func checkMultip(pt *[][]string, gpt *[][][]string, sli []string, index, ants in
 	}
 }
 
-func uniqueSlices(gpt [][]string) [][]string {
+func uniqueSlices(gpt *[][]string, res *[][]string, index int) int {
 	result := make([][]string, 0)
-	pt := []string{}
-	pt1 := []string{}
 	paths := make(map[string]int)
-	for i := 0; i < len(gpt); i++ {
-		for j := 0; j < len(gpt); j++ {
-			if i != j {
-				if len(gpt[i]) < len(gpt[i]) {
-					pt = gpt[i]
-					pt1 = gpt[j]
-				} else {
-					pt = gpt[j]
-					pt1 = gpt[i]
-				}
-				for k := 1; k < len(pt)-1; k++ {
-					if contains(pt1, pt[k]) {
-						key := strings.Join(gpt[i], ",")
-						paths[key]++
-						break
-					}
+	var valid bool
+	for i := 0; i < len(*gpt); i++ {
+		for j := 0; j < len(*gpt); j++ {
+			for k := 1; k < len((*gpt)[i])-1; k++ {
+				if contains((*gpt)[j], (*gpt)[i][k]) {
+					key := strings.Join((*gpt)[i], ",")
+					paths[key]++
+					break
 				}
 			}
 		}
 	}
-	for path, count := range paths {
-		if count < len(gpt)-1 {
-			result = append(result, strings.Split(path, ","))
+	if len(*gpt) != 0 {
+		min := paths[strings.Join((*gpt)[0], ",")]
+		for _, count := range paths {
+			if count < min {
+				min = count
+			}
+		}
+		for path, count := range paths {
+			if count == min && !checkSlice1(res, strings.Split(path, ",")) {
+				result = append(result, strings.Split(path, ","))
+				valid = true
+			}
 		}
 	}
-	return result
+	sort.Slice(result, func(i, j int) bool {
+		return len(result[i]) < len(result[j])
+	})
+	if valid {
+		index--
+		*res = append(*res, result[0])
+		deleteSlice(gpt, result[0])
+	}
+	return index
 }
 
-func bestPaths(pt [][]string, ants int) [][]string {
+func deleteSlice(slices *[][]string, sli []string) {
+	for j := 0; j < len(*slices); j++ {
+		for i := 1; i < len(sli)-1; i++ {
+			if contains((*slices)[j], sli[i]) {
+				*slices = append((*slices)[:j], (*slices)[j+1:]...)
+				j--
+				break
+			}
+		}
+	}
+}
+
+func bestPaths(pt [][]string) [][]string {
 	var npt [][]string
 	var mpt [][]string
 	var res [][]string
@@ -252,10 +282,10 @@ func bestPaths(pt [][]string, ants int) [][]string {
 		i = check(&mpt, &npt, &pt, pt[i], i)
 	}
 	for i := 0; i < len(mpt); i++ {
-		checkMultip(&mpt, &gpt, mpt[i], i, ants)
+		checkMultip(&mpt, &gpt, mpt[i], i)
 	}
-	for _, gr := range gpt {
-		res = append(res, uniqueSlices(gr)...)
+	for i := 0; i < len(gpt); i++ {
+		i = uniqueSlices(&gpt[i], &res, i)
 	}
 	sort.Slice(res, func(i, j int) bool {
 		return len(res[i]) < len(res[j])
@@ -292,6 +322,6 @@ func main() {
 	}
 	var pt []string
 	getPaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, pt)
-	best := bestPaths(paths, antFarm.ants)
+	best := bestPaths(paths)
 	fmt.Println(best, "best")
 }
