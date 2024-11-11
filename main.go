@@ -48,7 +48,6 @@ func readInput(filename string) (AntFarm, error) {
 		return AntFarm{}, err
 	}
 	defer file.Close()
-
 	scanner := bufio.NewScanner(file)
 	var af AntFarm
 	var state string
@@ -108,7 +107,6 @@ func readInput(filename string) (AntFarm, error) {
 			return AntFarm{}, err
 		}
 	}
-
 	if scanner.Err() != nil {
 		return AntFarm{}, scanner.Err()
 	}
@@ -126,15 +124,15 @@ func contains(arr []string, str string) bool {
 
 var paths [][]string
 
-func check(mpt *[][]string, npt *[][]string, pt *[][]string, sli []string, index int) int {
+func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sli []string, index int) int {
 	count := 0
 	valid := false
 	slices := [][]string{sli}
-	for i := 0; i < len(*pt); i++ {
+	for i := 0; i < len(*path); i++ {
 		for j := 1; j < len(sli)-1; j++ {
-			for k := 1; k < len((*pt)[i])-1; k++ {
-				if sli[j] == (*pt)[i][k] && index != i {
-					slices = append(slices, (*pt)[i])
+			for k := 1; k < len((*path)[i])-1; k++ {
+				if sli[j] == (*path)[i][k] && index != i {
+					slices = append(slices, (*path)[i])
 					count++
 					valid = true
 				}
@@ -145,17 +143,17 @@ func check(mpt *[][]string, npt *[][]string, pt *[][]string, sli []string, index
 		}
 	}
 	if count == 0 {
-		*npt = append(*npt, sli)
+		*newPaths = append(*newPaths, sli)
 	} else if count == 1 && len(slices) != 0 && len(sli) < len(slices[1]) {
-		*npt = append(*npt, sli)
+		*newPaths = append(*newPaths, sli)
 	} else if count >= 2 {
-		*mpt = append(*mpt, sli)
+		*multiplePaths = append(*multiplePaths, sli)
 	}
 	return index
 }
 
-func checkSlice(gpt *[][][]string, sli []string) bool {
-	for _, group := range *gpt {
+func checkSlice(groupedPaths *[][][]string, sli []string) bool {
+	for _, group := range *groupedPaths {
 		for _, slices := range group {
 			if slicesEqual(slices, sli) {
 				return true
@@ -165,8 +163,8 @@ func checkSlice(gpt *[][][]string, sli []string) bool {
 	return false
 }
 
-func checkSlice1(gpt *[][]string, sli []string) bool {
-	for _, slice := range *gpt {
+func checkSlice1(groupedPaths *[][]string, sli []string) bool {
+	for _, slice := range *groupedPaths {
 		for i := 1; i < len(slice)-1; i++ {
 			if contains(sli, slice[i]) {
 				return true
@@ -188,29 +186,29 @@ func slicesEqual(slice1, slice2 []string) bool {
 	return true
 }
 
-func groupPaths(gpt *[][][]string, sli []string, element string) {
-	for i, group := range *gpt {
+func groupPaths(groupedPaths *[][][]string, sli []string, element string) {
+	for i, group := range *groupedPaths {
 		for _, slices := range group {
 			for _, elem := range slices {
 				if elem == element {
-					(*gpt)[i] = append((*gpt)[i], sli)
+					(*groupedPaths)[i] = append((*groupedPaths)[i], sli)
 					return
 				}
 			}
 		}
 	}
-	*gpt = append(*gpt, [][]string{sli})
+	*groupedPaths = append(*groupedPaths, [][]string{sli})
 }
 
-func checkMultip(pt *[][]string, gpt *[][][]string, sli []string, index int) {
-	if checkSlice(gpt, sli) {
+func checkMultip(path *[][]string, groupedPaths *[][][]string, sli []string, index int) {
+	if checkSlice(groupedPaths, sli) {
 		return
 	}
-	for i := 0; i < len(*pt); i++ {
+	for i := 0; i < len(*path); i++ {
 		for j := 1; j < len(sli)-1; j++ {
-			for k := 1; k < len((*pt)[i])-1; k++ {
-				if sli[j] == (*pt)[i][k] && index != i {
-					groupPaths(gpt, sli, sli[j])
+			for k := 1; k < len((*path)[i])-1; k++ {
+				if sli[j] == (*path)[i][k] && index != i {
+					groupPaths(groupedPaths, sli, sli[j])
 					return
 				}
 			}
@@ -218,42 +216,58 @@ func checkMultip(pt *[][]string, gpt *[][][]string, sli []string, index int) {
 	}
 }
 
-func uniqueSlices(gpt *[][]string, res *[][]string, index int) int {
+func uniqueSlices(groupedPaths *[][]string, shortPaths, multiplePaths *[][]string, index int) int {
 	result := make([][]string, 0)
 	paths := make(map[string]int)
 	var valid bool
-	for i := 0; i < len(*gpt); i++ {
-		for j := 0; j < len(*gpt); j++ {
-			for k := 1; k < len((*gpt)[i])-1; k++ {
-				if contains((*gpt)[j], (*gpt)[i][k]) {
-					key := strings.Join((*gpt)[i], ",")
+	if len(*shortPaths) == index {
+		*shortPaths = append(*shortPaths, (*groupedPaths)[0])
+		for i := 1; i < len(*groupedPaths); i++ {
+			var duplicated bool
+			for j := 0; j < len(*shortPaths); j++ {
+				for k := 1; k < len((*shortPaths)[j])-1; k++ {
+					if contains((*groupedPaths)[i], (*shortPaths)[j][k]) {
+						duplicated = true
+						break
+					}
+				}
+			}
+			if !duplicated {
+				*shortPaths = append(*shortPaths, (*groupedPaths)[i])
+				break
+			}
+		}
+	}
+	for i := 0; i < len(*groupedPaths); i++ {
+		for j := 0; j < len(*groupedPaths); j++ {
+			for k := 1; k < len((*groupedPaths)[i])-1; k++ {
+				if contains((*groupedPaths)[j], (*groupedPaths)[i][k]) {
+					key := strings.Join((*groupedPaths)[i], ",")
 					paths[key]++
 					break
 				}
 			}
 		}
 	}
-	if len(*gpt) != 0 {
-		min := paths[strings.Join((*gpt)[0], ",")]
+	if len(*groupedPaths) != 0 {
+		min := paths[strings.Join((*groupedPaths)[0], ",")]
 		for _, count := range paths {
 			if count < min {
 				min = count
 			}
 		}
 		for path, count := range paths {
-			if count == min && !checkSlice1(res, strings.Split(path, ",")) {
+			if count == min && !checkSlice1(multiplePaths, strings.Split(path, ",")) {
 				result = append(result, strings.Split(path, ","))
 				valid = true
 			}
 		}
 	}
-	sort.Slice(result, func(i, j int) bool {
-		return len(result[i]) < len(result[j])
-	})
+	sortingPaths(&result)
 	if valid {
 		index--
-		*res = append(*res, result[0])
-		deleteSlice(gpt, result[0])
+		*multiplePaths = append(*multiplePaths, result[0])
+		deleteSlice(groupedPaths, result[0])
 	}
 	return index
 }
@@ -270,27 +284,23 @@ func deleteSlice(slices *[][]string, sli []string) {
 	}
 }
 
-func bestPaths(pt [][]string) [][]string {
-	var npt [][]string
-	var mpt [][]string
-	var res [][]string
-	var gpt [][][]string
-	sort.Slice(pt, func(i, j int) bool {
-		return len(pt[i]) < len(pt[j])
-	})
-	for i := 0; i < len(pt); i++ {
-		i = check(&mpt, &npt, &pt, pt[i], i)
+func bestPaths(path [][]string) ([][]string, [][]string) {
+	var newPaths [][]string
+	var multiplePaths [][]string
+	var shortPaths [][]string
+	var mulitpe [][]string
+	var groupedPaths [][][]string
+	sortingPaths(&path)
+	for i := 0; i < len(path); i++ {
+		i = check(&multiplePaths, &newPaths, &path, path[i], i)
 	}
-	for i := 0; i < len(mpt); i++ {
-		checkMultip(&mpt, &gpt, mpt[i], i)
+	for i := 0; i < len(multiplePaths); i++ {
+		checkMultip(&multiplePaths, &groupedPaths, multiplePaths[i], i)
 	}
-	for i := 0; i < len(gpt); i++ {
-		i = uniqueSlices(&gpt[i], &res, i)
+	for i := 0; i < len(groupedPaths); i++ {
+		i = uniqueSlices(&groupedPaths[i], &shortPaths, &mulitpe, i)
 	}
-	sort.Slice(res, func(i, j int) bool {
-		return len(res[i]) < len(res[j])
-	})
-	return append(npt, res...)
+	return append(newPaths, shortPaths...), append(newPaths, mulitpe...)
 }
 
 func getPaths(af []Tunnel, start string, end string, pa []string) {
@@ -309,6 +319,12 @@ func getPaths(af []Tunnel, start string, end string, pa []string) {
 	}
 }
 
+func sortingPaths(path *[][]string) {
+	sort.Slice(*path, func(i, j int) bool {
+		return len((*path)[i]) < len((*path)[j])
+	})
+}
+
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: go run . <filename>")
@@ -320,8 +336,51 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	var pt []string
-	getPaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, pt)
-	best := bestPaths(paths)
-	fmt.Println(best, "best")
+	var path []string
+	getPaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, path)
+	shortPaths, mulitpePaths := bestPaths(paths)
+	// fmt.Println(shortPaths, "short")
+	// fmt.Println(mulitpePaths, "multip")
+	depart := antFarm.ants
+	finalPath := [][]string{}
+	numberPaths := []int{}
+	for antFarm.ants > 0 {
+		if antFarm.ants == depart {
+			finalPaths(&antFarm.ants, &shortPaths, &finalPath, &numberPaths)
+		} else {
+			finalPaths(&antFarm.ants, &mulitpePaths, &finalPath, &numberPaths)
+		}
+	}
+	fmt.Println(finalPath, "final", numberPaths)
+	printAnt(finalPath, antFarm.ants, numberPaths)
+}
+
+func finalPaths(ants *int, Paths, finalPath *[][]string, numberPaths *[]int) {
+	count := 0
+	for _, c := range *Paths {
+		if *ants > 0 {
+			if len(c)-2 > *ants && len(c) != len((*Paths)[0]) {
+				break
+			}
+			count++
+			*finalPath = append(*finalPath, c[1:])
+			*ants--
+		}
+	}
+	*numberPaths = append(*numberPaths, count)
+}
+
+func printAnt(finalPath [][]string, ants int, path []int) {
+	count := 0
+	for i := 0; i < len(path); i++ {
+		count += path[i]
+		for j := 0; j < count; j++ {
+
+		}
+		if i == len(path)-1 {
+			for j := 0; j < len(finalPath[len(finalPath)-1]); j++ {
+
+			}
+		}
+	}
 }
