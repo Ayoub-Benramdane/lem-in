@@ -339,8 +339,9 @@ func main() {
 	var path []string
 	getPaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, path)
 	shortPaths, mulitpePaths := bestPaths(paths)
-	// fmt.Println(shortPaths, "short")
-	// fmt.Println(mulitpePaths, "multip")
+	if len(shortPaths) == len(mulitpePaths) {
+		shortPaths = mulitpePaths
+	}
 	depart := antFarm.ants
 	finalPath := [][]string{}
 	numberPaths := []int{}
@@ -351,36 +352,49 @@ func main() {
 			finalPaths(&antFarm.ants, &mulitpePaths, &finalPath, &numberPaths)
 		}
 	}
-	fmt.Println(finalPath, "final", numberPaths)
-	printAnt(finalPath, antFarm.ants, numberPaths)
+	printAnt(finalPath, numberPaths)
 }
 
-func finalPaths(ants *int, Paths, finalPath *[][]string, numberPaths *[]int) {
+func finalPaths(totalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int) {
 	count := 0
 	for _, c := range *Paths {
-		if *ants > 0 {
-			if len(c)-2 > *ants && len(c) != len((*Paths)[0]) {
+		if *totalAnts > 0 {
+			if len(c)-*totalAnts > *totalAnts && len(c)-*totalAnts > len((*Paths)[0]) {
 				break
 			}
 			count++
 			*finalPath = append(*finalPath, c[1:])
-			*ants--
+			*totalAnts--
 		}
 	}
 	*numberPaths = append(*numberPaths, count)
 }
 
-func printAnt(finalPath [][]string, ants int, path []int) {
+func printAnt(finalPath [][]string, path []int) {
 	count := 0
 	for i := 0; i < len(path); i++ {
 		count += path[i]
 		for j := 0; j < count; j++ {
-
-		}
-		if i == len(path)-1 {
-			for j := 0; j < len(finalPath[len(finalPath)-1]); j++ {
-
+			if 0 < len(finalPath[j]) {
+				fmt.Print("L", j+1, "-", finalPath[j][0], " ")
+				finalPath[j] = finalPath[j][1:]
 			}
 		}
+		fmt.Println()
+	}
+	max := len(finalPath[0])
+	for j := 0; j < len(finalPath); j++ {
+		if max < len(finalPath[j]) {
+			max = len(finalPath[j])
+		}
+	}
+	for j := 0; j < max; j++ {
+		for j := 0; j < count; j++ {
+			if 0 < len(finalPath[j]) {
+				fmt.Print("L", j+1, "-", finalPath[j][0], " ")
+				finalPath[j] = finalPath[j][1:]
+			}
+		}
+		fmt.Println()
 	}
 }
