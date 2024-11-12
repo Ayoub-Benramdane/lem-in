@@ -124,9 +124,10 @@ func contains(arr []string, str string) bool {
 
 var paths [][]string
 
-func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sli []string, index int) int {
+func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sli []string, index int) {
 	count := 0
 	slices := [][]string{sli}
+	room := ""
 	for i := 0; i < len(*path); i++ {
 		valid := false
 		if index != i  {
@@ -134,7 +135,12 @@ func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sl
 				for k := 1; k < len((*path)[i])-1; k++ {
 					if sli[j] == (*path)[i][k] {
 						slices = append(slices, (*path)[i])
-						count++
+						if len(slices) == 2 {
+							count++
+							room = sli[j]
+						} else if sli[j] != room {
+							count++
+						}
 						valid = true
 					}
 					if valid {
@@ -152,19 +158,19 @@ func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sl
 
 	// Compare length first
 	if len(sli) == len(expected) {
-		matches := true
+		// matches := true
 		for i := range sli {
 			if sli[i] != expected[i] {
-				matches = false
+				// matches = false
 				break
 			}
 		}
-		if matches {
-			fmt.Println(slices)
-			fmt.Println("_____________________________________________________________________")
-			fmt.Println(sli)
-			fmt.Println(count)
-		}
+		// if matches {
+		// 	fmt.Println(slices)
+		// 	fmt.Println("_____________________________________________________________________")
+		// 	fmt.Println(sli)
+		// 	fmt.Println(count, room)
+		// }
 	}
 	///////////////////////////////////////////////////////
 	if count == 0 {
@@ -174,7 +180,6 @@ func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sl
 	} else if count >= 2 {
 		*multiplePaths = append(*multiplePaths, sli)
 	}
-	return index
 }
 
 func checkSlice(groupedPaths *[][][]string, sli []string) bool {
@@ -317,7 +322,7 @@ func bestPaths(path [][]string) ([][]string, [][]string) {
 	var groupedPaths [][][]string
 	sortingPaths(&path)
 	for i := 0; i < len(path); i++ {
-		i = check(&multiplePaths, &newPaths, &path, path[i], i)
+		check(&multiplePaths, &newPaths, &path, path[i], i)
 	}
 	for i := 0; i < len(multiplePaths); i++ {
 		checkMultip(&multiplePaths, &groupedPaths, multiplePaths[i], i)
@@ -377,7 +382,7 @@ func main() {
 		}
 	}
 	// fmt.Println(finalPath, "\nfinal")
-	// printAnt(finalPath, numberPaths)
+	printAnt(finalPath, numberPaths)
 }
 
 func finalPaths(totalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int) {
