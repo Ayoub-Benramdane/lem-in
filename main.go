@@ -94,13 +94,13 @@ func readInput(filename string) (AntFarm, error) {
 					tn.to = parts[1]
 					af.tunnels = append(af.tunnels, tn)
 					if tn.from == tn.to {
-						return AntFarm{}, fmt.Errorf("error: invalid tunnel")
+						return AntFarm{}, fmt.Errorf("ERROR: invalid data format")
 					}
 				} else {
-					return AntFarm{}, fmt.Errorf("ERROR: bad Tunnel Format")
+					return AntFarm{}, fmt.Errorf("ERROR: invalid data format")
 				}
 			} else {
-				return AntFarm{}, fmt.Errorf("ERROR: bad data Format")
+				return AntFarm{}, fmt.Errorf("ERROR: invalid data format")
 			}
 		}
 		if err != nil {
@@ -126,25 +126,50 @@ var paths [][]string
 
 func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sli []string, index int) int {
 	count := 0
-	valid := false
 	slices := [][]string{sli}
 	for i := 0; i < len(*path); i++ {
-		for j := 1; j < len(sli)-1; j++ {
-			for k := 1; k < len((*path)[i])-1; k++ {
-				if sli[j] == (*path)[i][k] && index != i {
-					slices = append(slices, (*path)[i])
-					count++
-					valid = true
+		valid := false
+		if index != i  {
+			for j := 1; j < len(sli)-1; j++ {
+				for k := 1; k < len((*path)[i])-1; k++ {
+					if sli[j] == (*path)[i][k] {
+						slices = append(slices, (*path)[i])
+						count++
+						valid = true
+					}
+					if valid {
+						break
+					}
 				}
-			}
-			if valid {
-				break
+				if valid {
+					break
+				}
 			}
 		}
 	}
+	////////////////////////////////////////////////////////
+	expected := []string{"start", "C0", "C1", "C2", "C3", "I4", "I5", "end"}
+
+	// Compare length first
+	if len(sli) == len(expected) {
+		matches := true
+		for i := range sli {
+			if sli[i] != expected[i] {
+				matches = false
+				break
+			}
+		}
+		if matches {
+			fmt.Println(slices)
+			fmt.Println("_____________________________________________________________________")
+			fmt.Println(sli)
+			fmt.Println(count)
+		}
+	}
+	///////////////////////////////////////////////////////
 	if count == 0 {
 		*newPaths = append(*newPaths, sli)
-	} else if count == 1 && len(slices) != 0 && len(sli) < len(slices[1]) {
+	} else if count == 1 && len(slices) != 0 && len(sli) <= len(slices[1]) {
 		*newPaths = append(*newPaths, sli)
 	} else if count >= 2 {
 		*multiplePaths = append(*multiplePaths, sli)
@@ -288,7 +313,7 @@ func bestPaths(path [][]string) ([][]string, [][]string) {
 	var newPaths [][]string
 	var multiplePaths [][]string
 	var shortPaths [][]string
-	var mulitpe [][]string
+	var multiple [][]string
 	var groupedPaths [][][]string
 	sortingPaths(&path)
 	for i := 0; i < len(path); i++ {
@@ -298,9 +323,9 @@ func bestPaths(path [][]string) ([][]string, [][]string) {
 		checkMultip(&multiplePaths, &groupedPaths, multiplePaths[i], i)
 	}
 	for i := 0; i < len(groupedPaths); i++ {
-		i = uniqueSlices(&groupedPaths[i], &shortPaths, &mulitpe, i)
+		i = uniqueSlices(&groupedPaths[i], &shortPaths, &multiple, i)
 	}
-	return append(newPaths, shortPaths...), append(newPaths, mulitpe...)
+	return append(newPaths, shortPaths...), append(newPaths, multiple...)
 }
 
 func getPaths(af []Tunnel, start string, end string, pa []string) {
@@ -338,10 +363,9 @@ func main() {
 	}
 	var path []string
 	getPaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, path)
-	shortPaths, mulitpePaths := bestPaths(paths)
-	if len(shortPaths) == len(mulitpePaths) {
-		shortPaths = mulitpePaths
-	}
+	shortPaths, multiplePaths := bestPaths(paths)
+	// fmt.Println(shortPaths, "\nshort")
+	// fmt.Println(multiplePaths, "\nmultiple")
 	depart := antFarm.ants
 	finalPath := [][]string{}
 	numberPaths := []int{}
@@ -349,10 +373,11 @@ func main() {
 		if antFarm.ants == depart {
 			finalPaths(&antFarm.ants, &shortPaths, &finalPath, &numberPaths)
 		} else {
-			finalPaths(&antFarm.ants, &mulitpePaths, &finalPath, &numberPaths)
+			finalPaths(&antFarm.ants, &multiplePaths, &finalPath, &numberPaths)
 		}
 	}
-	printAnt(finalPath, numberPaths)
+	// fmt.Println(finalPath, "\nfinal")
+	// printAnt(finalPath, numberPaths)
 }
 
 func finalPaths(totalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int) {
