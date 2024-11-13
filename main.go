@@ -127,20 +127,14 @@ var paths [][]string
 func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sli []string, index int) {
 	count := 0
 	slices := [][]string{sli}
-	room := ""
 	for i := 0; i < len(*path); i++ {
 		valid := false
-		if index != i  {
+		if index != i {
 			for j := 1; j < len(sli)-1; j++ {
 				for k := 1; k < len((*path)[i])-1; k++ {
 					if sli[j] == (*path)[i][k] {
 						slices = append(slices, (*path)[i])
-						if len(slices) == 2 {
-							count++
-							room = sli[j]
-						} else if sli[j] != room {
-							count++
-						}
+						count++
 						valid = true
 					}
 					if valid {
@@ -153,26 +147,6 @@ func check(multiplePaths *[][]string, newPaths *[][]string, path *[][]string, sl
 			}
 		}
 	}
-	////////////////////////////////////////////////////////
-	expected := []string{"start", "C0", "C1", "C2", "C3", "I4", "I5", "end"}
-
-	// Compare length first
-	if len(sli) == len(expected) {
-		// matches := true
-		for i := range sli {
-			if sli[i] != expected[i] {
-				// matches = false
-				break
-			}
-		}
-		// if matches {
-		// 	fmt.Println(slices)
-		// 	fmt.Println("_____________________________________________________________________")
-		// 	fmt.Println(sli)
-		// 	fmt.Println(count, room)
-		// }
-	}
-	///////////////////////////////////////////////////////
 	if count == 0 {
 		*newPaths = append(*newPaths, sli)
 	} else if count == 1 && len(slices) != 0 && len(sli) <= len(slices[1]) {
@@ -264,7 +238,6 @@ func uniqueSlices(groupedPaths *[][]string, shortPaths, multiplePaths *[][]strin
 			}
 			if !duplicated {
 				*shortPaths = append(*shortPaths, (*groupedPaths)[i])
-				break
 			}
 		}
 	}
@@ -366,23 +339,44 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	if antFarm.ants <= 0 {
+		fmt.Println("invalid number of Ants")
+		return
+	} else if antFarm.ants <= 0 {
+		fmt.Println("ERROR: invalid data format")
+		return
+	}
 	var path []string
 	getPaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, path)
+	if len(path) <= 0 {
+		fmt.Println("ERROR: invalid data format")
+		return
+	}
 	shortPaths, multiplePaths := bestPaths(paths)
-	// fmt.Println(shortPaths, "\nshort")
-	// fmt.Println(multiplePaths, "\nmultiple")
 	depart := antFarm.ants
 	finalPath := [][]string{}
 	numberPaths := []int{}
+	done := false
+	lengthpaths := length(shortPaths)
 	for antFarm.ants > 0 {
 		if antFarm.ants == depart {
 			finalPaths(&antFarm.ants, &shortPaths, &finalPath, &numberPaths)
+		} else if antFarm.ants <= lengthpaths/len(shortPaths) && !done {
+			finalPaths(&antFarm.ants, &shortPaths, &finalPath, &numberPaths)
 		} else {
+			done = true
 			finalPaths(&antFarm.ants, &multiplePaths, &finalPath, &numberPaths)
 		}
 	}
-	// fmt.Println(finalPath, "\nfinal")
 	printAnt(finalPath, numberPaths)
+}
+
+func length(shortPaths [][]string) int {
+	count := 0
+	for _, c := range shortPaths {
+		count += len(c)
+	}
+	return count
 }
 
 func finalPaths(totalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int) {
