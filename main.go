@@ -306,18 +306,18 @@ func bestPaths(path [][]string) ([][]string, [][]string) {
 	return append(newPaths, shortPaths...), append(newPaths, multiple...)
 }
 
-func getPaths(af []Tunnel, start string, end string, pa []string) {
-	pa = append(pa, start)
+func getPaths(af []Tunnel, start string, end string, path []string) {
+	path = append(path, start)
 	for h := 0; h < len(af); h++ {
 		if start == end {
-			cpy := make([]string, len(pa))
-			copy(cpy, pa)
+			cpy := make([]string, len(path))
+			copy(cpy, path)
 			paths = append(paths, cpy)
 			return
-		} else if start == af[h].from && !contains(pa, af[h].to) {
-			getPaths(af, af[h].to, end, pa)
-		} else if start == af[h].to && !contains(pa, af[h].from) {
-			getPaths(af, af[h].from, end, pa)
+		} else if start == af[h].from && !contains(path, af[h].to) {
+			getPaths(af, af[h].to, end, path)
+		} else if start == af[h].to && !contains(path, af[h].from) {
+			getPaths(af, af[h].from, end, path)
 		}
 	}
 }
@@ -326,49 +326,6 @@ func sortingPaths(path *[][]string) {
 	sort.Slice(*path, func(i, j int) bool {
 		return len((*path)[i]) < len((*path)[j])
 	})
-}
-
-func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("Usage: go run . <filename>")
-		return
-	}
-	filename := os.Args[1]
-	antFarm, err := readInput(filename)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	if antFarm.ants <= 0 {
-		fmt.Println("invalid number of Ants")
-		return
-	} else if antFarm.ants <= 0 {
-		fmt.Println("ERROR: invalid data format")
-		return
-	}
-	var path []string
-	getPaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, path)
-	if len(path) <= 0 {
-		fmt.Println("ERROR: invalid data format")
-		return
-	}
-	shortPaths, multiplePaths := bestPaths(paths)
-	depart := antFarm.ants
-	finalPath := [][]string{}
-	numberPaths := []int{}
-	done := false
-	lengthpaths := length(shortPaths)
-	for antFarm.ants > 0 {
-		if antFarm.ants == depart {
-			finalPaths(&antFarm.ants, &shortPaths, &finalPath, &numberPaths)
-		} else if antFarm.ants <= lengthpaths/len(shortPaths) && !done {
-			finalPaths(&antFarm.ants, &shortPaths, &finalPath, &numberPaths)
-		} else {
-			done = true
-			finalPaths(&antFarm.ants, &multiplePaths, &finalPath, &numberPaths)
-		}
-	}
-	printAnt(finalPath, numberPaths)
 }
 
 func length(shortPaths [][]string) int {
@@ -421,4 +378,46 @@ func printAnt(finalPath [][]string, path []int) {
 		}
 		fmt.Println()
 	}
+}
+
+func main() {
+	if len(os.Args) != 2 {
+		fmt.Println("Usage: go run . <filename>")
+		return
+	}
+	filename := os.Args[1]
+	antFarm, err := readInput(filename)
+	if err != nil {
+		fmt.Println(err)
+		return
+	} else if antFarm.ants <= 0 {
+		fmt.Println("invalid number of Ants")
+		return
+	} else if len(antFarm.tunnels) <= 0 {
+		fmt.Println("ERROR: invalid data format")
+		return
+	}
+	var path []string
+	getPaths(antFarm.tunnels, antFarm.start.name, antFarm.end.name, path)
+	if len(paths) <= 0 {
+		fmt.Println("ERROR: invalid data format")
+		return
+	}
+	shortPaths, multiplePaths := bestPaths(paths)
+	depart := antFarm.ants
+	finalPath := [][]string{}
+	numberPaths := []int{}
+	done := false
+	lengthpaths := length(shortPaths)
+	for antFarm.ants > 0 {
+		if antFarm.ants == depart {
+			finalPaths(&antFarm.ants, &shortPaths, &finalPath, &numberPaths)
+		} else if antFarm.ants <= lengthpaths/len(shortPaths) && !done {
+			finalPaths(&antFarm.ants, &shortPaths, &finalPath, &numberPaths)
+		} else {
+			done = true
+			finalPaths(&antFarm.ants, &multiplePaths, &finalPath, &numberPaths)
+		}
+	}
+	printAnt(finalPath, numberPaths)
 }
