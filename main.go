@@ -29,6 +29,9 @@ type AntFarm struct {
 }
 
 func tointeg(lay []string) (Room, error) {
+	if len(lay) != 3 {
+		return Room{}, fmt.Errorf("ERROR: invalid data format")
+	}
 	var rtn Room
 	var err, err1 error
 	rtn.name = lay[0]
@@ -68,13 +71,13 @@ func readInput(filename string) (AntFarm, error) {
 		switch state {
 		case "start":
 			if len(af.start.name) > 0 {
-				return AntFarm{}, fmt.Errorf("error : double start room")
+				return AntFarm{}, fmt.Errorf("ERROR : double start room")
 			}
 			af.start, err = tointeg(strings.Split(line, " "))
 			state = ""
 		case "end":
 			if len(af.end.name) > 0 {
-				return AntFarm{}, fmt.Errorf("error : double end room")
+				return AntFarm{}, fmt.Errorf("ERROR : double end room")
 			}
 			af.end, err = tointeg(strings.Split(line, " "))
 			state = ""
@@ -316,8 +319,6 @@ func getPaths(af []Tunnel, start string, end string, path []string) {
 			return
 		} else if start == af[h].from && !contains(path, af[h].to) {
 			getPaths(af, af[h].to, end, path)
-		} else if start == af[h].to && !contains(path, af[h].from) {
-			getPaths(af, af[h].from, end, path)
 		}
 	}
 }
