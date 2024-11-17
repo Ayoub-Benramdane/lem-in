@@ -78,6 +78,8 @@ func GetPaths(af []structs.Tunnel, Start string, End string, path []string) {
 			return
 		} else if Start == af[h].From && !Contains(path, af[h].To) {
 			GetPaths(af, af[h].To, End, path)
+		} else if Start == af[h].To && !Contains(path, af[h].From) {
+			GetPaths(af, af[h].From, End, path)
 		}
 	}
 }

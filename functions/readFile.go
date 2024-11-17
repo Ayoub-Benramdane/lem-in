@@ -26,7 +26,7 @@ func ReadInput(fileName string) structs.AntFarm {
 				state = "end"
 			}
 			continue
-		} else if line == "" || strings.HasPrefix(line, "##") {
+		} else if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
 		parts := strings.Fields(line)
