@@ -34,6 +34,9 @@ func ReadInput(fileName string) structs.AntFarm {
 			_, err := fmt.Sscanf(line, "%d", &af.Ants)
 			CheckErrors(err)
 		} else if len(parts) == 3 {
+			if len(parts[0]) > 0 && parts[0][0] == 'L' {
+				ErrorRoom(parts[0])
+			}
 			rm = ToInt(parts)
 			CheckErrors(err)
 			CheckCordonnes(af.Rooms, rm)
@@ -65,6 +68,8 @@ func ReadInput(fileName string) structs.AntFarm {
 	CheckErrors(scanner.Err())
 	if af.Ants <= 0 || len(af.Tunnels) <= 0 {
 		ErrorData()
+	} else if af.Start.Name == "" || af.End.Name == "" {
+		ErrorStartEndRoom()
 	}
 	return af
 }

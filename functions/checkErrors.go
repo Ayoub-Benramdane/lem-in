@@ -34,6 +34,16 @@ func CheckIsDouble(room, state string) {
 	}
 }
 
+func ErrorRoom(Room string) {
+	fmt.Printf("ERROR: Room '%s' Started with L\n", Room)
+	os.Exit(0)
+}
+
+func ErrorStartEndRoom() {
+	fmt.Println("Invalid Path! Check Start and End Rooms")
+	os.Exit(0)
+}
+
 func ErrorData() {
 	fmt.Println("ERROR: invalid data format")
 	os.Exit(0)

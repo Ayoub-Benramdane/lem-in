@@ -69,12 +69,13 @@ func BestPaths(path [][]string) ([][]string, [][]string) {
 }
 
 func GetPaths(af []structs.Tunnel, Start string, End string, path []string) {
+	var paths = &structs.Paths
 	path = append(path, Start)
 	for h := 0; h < len(af); h++ {
 		if Start == End {
 			cpy := make([]string, len(path))
 			copy(cpy, path)
-			structs.Paths = append(structs.Paths, cpy)
+			*paths = append(*paths, cpy)
 			return
 		} else if Start == af[h].From && !Contains(path, af[h].To) {
 			GetPaths(af, af[h].To, End, path)
