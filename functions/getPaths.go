@@ -70,6 +70,9 @@ func BestPaths(path [][]string) ([][]string, [][]string) {
 
 func GetPaths(af []structs.Tunnel, Start string, End string, path []string) {
 	var paths = &structs.Paths
+	if len(*paths) == 5000 {
+		return
+	}
 	path = append(path, Start)
 	for h := 0; h < len(af); h++ {
 		if Start == End {
