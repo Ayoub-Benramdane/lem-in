@@ -85,7 +85,7 @@ func drawLine(grid [][]string, room1, room2 [2]int, rooms []string) {
 			x := room1[1] + (room2[1]-room1[1])*i/steps
 			for j := 1; j < 4; j++ {
 				if x+j < len(grid[y]) && grid[y][x+j] == " " {
-					if Contains(rooms, grid[y][x]) {
+					if ContainsRoom(rooms, grid[y][x]) {
 						break
 					}
 					grid[y][x+j] = char
