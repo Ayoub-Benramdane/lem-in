@@ -22,12 +22,13 @@ func CleanPath(bestPaths [][]string, multiplePaths *[][]string) {
 	}
 }
 
-func Length(shortPaths [][]string) int {
-	count := 0
-	for _, c := range shortPaths {
-		count += len(c)
+func CheckLen(paths [][]string, lengt int) bool {
+	for _, path := range paths {
+		if len(path) <= lengt {
+			return true
+		}
 	}
-	return count
+	return false
 }
 
 func ContainsPath(paths, slices [][]string, room string) bool {
@@ -43,6 +44,19 @@ func ContainsPath(paths, slices [][]string, room string) bool {
 		}
 	}
 	return false
+}
+
+func NotInShort(shortPaths, result [][]string) bool {
+	for _, path := range shortPaths {
+		for i := 1; i < len(path)-1; i++ {
+			for _, slice := range result {
+				if ContainsRoom(slice, path[i]) {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }
 
 func ContainsRoom(path []string, room string) bool {
@@ -75,4 +89,12 @@ func CheckSlice(paths *[][]string, slice []string) bool {
 		}
 	}
 	return false
+}
+
+func Length(shortPaths [][]string) int {
+	count := 0
+	for _, c := range shortPaths {
+		count += len(c)
+	}
+	return count
 }

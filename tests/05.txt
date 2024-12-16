@@ -1,4 +1,4 @@
-9
+40
 #rooms
 ##start
 start 0 3

@@ -26,13 +26,14 @@ func main() {
 	}
 	fmt.Println("File:\n" + strings.Join(file, "\n") + "\n\nLemin:")
 	// functions.PrintGraph(antFarm)
-	shortPaths, multiplePaths := functions.BestPaths(structs.Paths)
-	if len(shortPaths) == 0 && len(multiplePaths) == 0 {
+	shortPaths, longPaths := functions.BestPaths(structs.Paths)
+	fmt.Println(shortPaths, "\n", longPaths)
+	if len(shortPaths) == 0 && len(longPaths) == 0 {
 		fmt.Println("ERROR: invalid path")
 		return
-	} else if len(shortPaths) >= len(multiplePaths) {
-		multiplePaths = shortPaths
+	} else if len(shortPaths) >= len(longPaths) {
+		longPaths = shortPaths
 	}
-	functions.PathAnts(&antFarm.Ants, &shortPaths, &multiplePaths, &finalPath, &numberPaths)
+	functions.PathAnts(&antFarm.Ants, &shortPaths, &longPaths, &finalPath, &numberPaths)
 	functions.PrintAnt(finalPath, numberPaths)
 }

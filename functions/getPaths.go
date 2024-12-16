@@ -35,14 +35,13 @@ func BestPaths(paths [][]string) ([][]string, [][]string) {
 	for i := 0; i < len(multiplePaths); i++ {
 		MultipPaths(multiplePaths, &groupedPaths, multiplePaths[i], i)
 	}
-	fmt.Println(bestPaths, shortPaths, multiplePaths)
 	group := make(map[int]bool)
 	for i := 0; i < len(groupedPaths); i++ {
 		if len(groupedPaths[i]) > 0 {
 			i = ShortLong(&groupedPaths[i], &shortPaths, &longPaths, i, &group)
 		}
 	}
-	fmt.Println(bestPaths, shortPaths, longPaths)
+	fmt.Println("best-----------\n", bestPaths)
 	return append(bestPaths, shortPaths...), append(bestPaths, longPaths...)
 }
 
@@ -169,11 +168,20 @@ func ShortLong(groupedPaths, shortPaths, longPaths *[][]string, index int, group
 		}
 	}
 	if valid {
-		if CheckLen(result, len((*shortPaths)[len(*shortPaths)-1])) { //ila kan chi 7ed mn l multiple ged short f tol kn7yd short w nde5el ga3 lmultiple
+		SortingPaths(&result)
+		if CheckLen(result, len((*shortPaths)[len(*shortPaths)-1])) && NotInShort(result, (*shortPaths)[:len(*shortPaths)-1]) { //ila kan chi 7ed mn l multiple ged short f tol kn7yd short w nde5el ga3 lmultiple
 			*shortPaths = (*shortPaths)[:len(*shortPaths)-1]
-			*shortPaths = append(*shortPaths, result...)
+			for _, path := range result {
+				if !CheckSlice(shortPaths, path) {
+					*shortPaths = append(*shortPaths, path)
+				}
+			}
 		} else {
-			*longPaths = append(*longPaths, result...)
+			for _, path := range result {
+				if !CheckSlice(longPaths, path) {
+					*longPaths = append(*longPaths, path)
+				}
+			}
 		}
 		CleanPath(result, groupedPaths) //knms7 ga3 les paths li ba9yin f had lgroup w kytla9aw f chi no9ta m3a chi w7d fles paths li l9iit
 		index--
@@ -181,42 +189,54 @@ func ShortLong(groupedPaths, shortPaths, longPaths *[][]string, index int, group
 	return index
 }
 
-func CheckLen(paths [][]string, lengt int) bool {
-	for _, path := range paths {
-		if len(path) <= lengt {
-			return true
-		}
-	}
-	return false
-}
-
-func PathAnts(TotalAnts *int, shortPaths, multiplePaths, finalPath *[][]string, numberPaths *[]int) {
+func PathAnts(TotalAnts *int, shortPaths, longPaths, finalPath *[][]string, numberPaths *[]int) {
 	depart := *TotalAnts
 	done := false
-	lengthpaths := Length(*shortPaths)
 	for *TotalAnts > 0 {
 		if *TotalAnts == depart {
 			FinalPaths(TotalAnts, shortPaths, finalPath, numberPaths)
-		} else if *TotalAnts <= lengthpaths/len(*shortPaths) && !done {
+		} else if *TotalAnts <= Length(*shortPaths)/len(*shortPaths) && !done {
 			FinalPaths(TotalAnts, shortPaths, finalPath, numberPaths)
 		} else {
 			done = true
-			FinalPaths(TotalAnts, multiplePaths, finalPath, numberPaths)
+			FinalPaths(TotalAnts, longPaths, finalPath, numberPaths)
 		}
 	}
 }
 
 func FinalPaths(TotalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int) {
 	count := 0
-	for _, c := range *Paths {
+	for i, path := range *Paths {
 		if *TotalAnts > 0 {
-			if len(c)-*TotalAnts > *TotalAnts && len(c)-*TotalAnts > len((*Paths)[0]) {
+			if i == 0 || *TotalAnts/(i+1) > len(path) {
+				count++
+				*finalPath = append(*finalPath, path[1:])
+				*TotalAnts--
+			} else if *TotalAnts/(i+1) > len(path) {
+				count++
+				*finalPath = append(*finalPath, path[1:])
+				*TotalAnts--
+			} else {
 				break
 			}
-			count++
-			*finalPath = append(*finalPath, c[1:])
-			*TotalAnts--
 		}
 	}
 	*numberPaths = append(*numberPaths, count)
 }
+
+// func FinalPaths(TotalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int) {
+// 	count := 0
+// 	for _, path := range *Paths {
+// 		if *TotalAnts > 0 {
+// 			if len(path)-*TotalAnts > *TotalAnts && len(path)-*TotalAnts > len(path) {
+// 				break
+// 			}
+// 			count++
+// 			*finalPath = append(*finalPath, path[1:])
+// 			*TotalAnts--
+// 		}
+// 	}
+// 	*numberPaths = append(*numberPaths, count)
+// }
+
+//kol path 5as chof ga3 les 9bl
