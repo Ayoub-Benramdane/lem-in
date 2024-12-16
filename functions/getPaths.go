@@ -1,13 +1,13 @@
 package functions
 
 import (
-	"fmt"
-	structs "lem-in/structs"
 	"strings"
+
+	structs "lem-in/structs"
 )
 
 func GetPaths(Tunnels []structs.Tunnel, Start, End string, path []string) {
-	var paths = &structs.Paths
+	paths := &structs.Paths
 	path = append(path, Start)
 	if Start == End {
 		newPath := make([]string, len(path))
@@ -29,9 +29,9 @@ func BestPaths(paths [][]string) ([][]string, [][]string) {
 	var groupedPaths [][][]string
 	SortingPaths(&paths)
 	for i := 0; i < len(paths); i++ {
-		UniquePaths(&multiplePaths, &bestPaths, paths, paths[i], i) //kn9lb 3la unique path bach ykono dymn valid
+		UniquePaths(&multiplePaths, &bestPaths, paths, paths[i], i) // kn9lb 3la unique path bach ykono dymn valid
 	}
-	CleanPath(bestPaths, &multiplePaths) //knms7 les paths li kychtarko f chi room m3a best
+	CleanPath(bestPaths, &multiplePaths) // knms7 les paths li kychtarko f chi room m3a best
 	for i := 0; i < len(multiplePaths); i++ {
 		MultipPaths(multiplePaths, &groupedPaths, multiplePaths[i], i)
 	}
@@ -41,7 +41,6 @@ func BestPaths(paths [][]string) ([][]string, [][]string) {
 			i = ShortLong(&groupedPaths[i], &shortPaths, &longPaths, i, &group)
 		}
 	}
-	fmt.Println("best-----------\n", bestPaths)
 	return append(bestPaths, shortPaths...), append(bestPaths, longPaths...)
 }
 
@@ -49,7 +48,7 @@ func UniquePaths(multiplePaths, bestPaths *[][]string, paths [][]string, slice [
 	var count int
 	var room string
 	slices := [][]string{slice}
-	for i := 0; i < len(paths); i++ { //kn9lb 3la ch7al mn room ttchark m3a path khrin
+	for i := 0; i < len(paths); i++ { // kn9lb 3la ch7al mn room ttchark m3a path khrin
 		valid := false
 		if index != i {
 			for j := 1; j < len(slice)-1; j++ {
@@ -74,7 +73,7 @@ func UniquePaths(multiplePaths, bestPaths *[][]string, paths [][]string, slice [
 	}
 	if count == 0 {
 		*bestPaths = append(*bestPaths, slice)
-	} else if count == 1 && !ContainsPath(paths, slices, room) { //kn9lb wach f dok les paths kyn chi path kydi mn chi tree9 khora f chi room khora
+	} else if count == 1 && !ContainsPath(paths, slices, room) { // kn9lb wach f dok les paths kyn chi path kydi mn chi tree9 khora f chi room khora
 		same := false
 		for _, path := range *bestPaths {
 			for _, room := range path {
@@ -99,7 +98,7 @@ func MultipPaths(paths [][]string, groupedPaths *[][][]string, slice []string, i
 			for j := 1; j < len(slice)-1; j++ {
 				for k := 1; k < len(paths[i])-1; k++ {
 					if slice[j] == paths[i][k] {
-						GroupPaths(groupedPaths, slice, slice[j]) //kn9sm l paths lgroupat kol group kychtrko f chi room
+						GroupPaths(groupedPaths, slice, slice[j]) // kn9sm l paths lgroupat kol group kychtrko f chi room
 						return
 					}
 				}
@@ -124,7 +123,7 @@ func ShortLong(groupedPaths, shortPaths, longPaths *[][]string, index int, group
 	result := make([][]string, 0)
 	paths := make(map[string]int)
 	var valid bool
-	if !(*group)[index] { //knchouf f kol group les path sghar wli mkytla9aw f ta room
+	if !(*group)[index] { // knchouf f kol group les path sghar wli mkytla9aw f ta room
 		(*group)[index] = true
 		*shortPaths = append(*shortPaths, (*groupedPaths)[0])
 		for i := 1; i < len(*groupedPaths); i++ {
@@ -148,7 +147,7 @@ func ShortLong(groupedPaths, shortPaths, longPaths *[][]string, index int, group
 	for i := 0; i < len(*groupedPaths); i++ {
 		for j := 0; j < len(*groupedPaths); j++ {
 			for k := 1; k < len((*groupedPaths)[i])-1; k++ {
-				if ContainsRoom((*groupedPaths)[j], (*groupedPaths)[i][k]) { //kn9lb 3la ch7al mn path f group kytchrk m3a lpath li rani feeh f room
+				if ContainsRoom((*groupedPaths)[j], (*groupedPaths)[i][k]) { // kn9lb 3la ch7al mn path f group kytchrk m3a lpath li rani feeh f room
 					paths[strings.Join((*groupedPaths)[i], ",")]++
 					break
 				}
@@ -169,7 +168,7 @@ func ShortLong(groupedPaths, shortPaths, longPaths *[][]string, index int, group
 	}
 	if valid {
 		SortingPaths(&result)
-		if CheckLen(result, len((*shortPaths)[len(*shortPaths)-1])) && NotInShort(result, (*shortPaths)[:len(*shortPaths)-1]) { //ila kan chi 7ed mn l multiple ged short f tol kn7yd short w nde5el ga3 lmultiple
+		if CheckLen(result, len((*shortPaths)[len(*shortPaths)-1])) && NotInShort(result, (*shortPaths)[:len(*shortPaths)-1]) { // ila kan chi 7ed mn l multiple ged short f tol kn7yd short w nde5el ga3 lmultiple
 			*shortPaths = (*shortPaths)[:len(*shortPaths)-1]
 			for _, path := range result {
 				if !CheckSlice(shortPaths, path) {
@@ -183,7 +182,7 @@ func ShortLong(groupedPaths, shortPaths, longPaths *[][]string, index int, group
 				}
 			}
 		}
-		CleanPath(result, groupedPaths) //knms7 ga3 les paths li ba9yin f had lgroup w kytla9aw f chi no9ta m3a chi w7d fles paths li l9iit
+		CleanPath(result, groupedPaths) // knms7 ga3 les paths li ba9yin f had lgroup w kytla9aw f chi no9ta m3a chi w7d fles paths li l9iit
 		index--
 	}
 	return index
@@ -208,11 +207,7 @@ func FinalPaths(TotalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int
 	count := 0
 	for i, path := range *Paths {
 		if *TotalAnts > 0 {
-			if i == 0 || *TotalAnts/(i+1) > len(path) {
-				count++
-				*finalPath = append(*finalPath, path[1:])
-				*TotalAnts--
-			} else if *TotalAnts/(i+1) > len(path) {
+			if i == 0 || check(*TotalAnts, *Paths, len(path)) {
 				count++
 				*finalPath = append(*finalPath, path[1:])
 				*TotalAnts--
@@ -224,19 +219,14 @@ func FinalPaths(TotalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int
 	*numberPaths = append(*numberPaths, count)
 }
 
-// func FinalPaths(TotalAnts *int, Paths, finalPath *[][]string, numberPaths *[]int) {
-// 	count := 0
-// 	for _, path := range *Paths {
-// 		if *TotalAnts > 0 {
-// 			if len(path)-*TotalAnts > *TotalAnts && len(path)-*TotalAnts > len(path) {
-// 				break
-// 			}
-// 			count++
-// 			*finalPath = append(*finalPath, path[1:])
-// 			*TotalAnts--
-// 		}
-// 	}
-// 	*numberPaths = append(*numberPaths, count)
-// }
-
-//kol path 5as chof ga3 les 9bl
+func check(ants int, paths [][]string, Len int) bool {
+	if Len == len(paths[0]) {
+		return true
+	}
+	for _, path := range paths {
+		if len(path)+ants <= Len {
+			return false
+		}
+	}
+	return true
+}

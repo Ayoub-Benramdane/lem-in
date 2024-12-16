@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	functions "lem-in/functions"
-	structs "lem-in/structs"
 	"os"
 	"strings"
+
+	functions "lem-in/functions"
+	structs "lem-in/structs"
 )
 
 func main() {
@@ -24,16 +25,17 @@ func main() {
 		fmt.Println("ERROR: invalid path")
 		return
 	}
-	fmt.Println("File:\n" + strings.Join(file, "\n") + "\n\nLemin:")
+	fmt.Println(strings.Join(file, "\n") + "\n")
 	// functions.PrintGraph(antFarm)
 	shortPaths, longPaths := functions.BestPaths(structs.Paths)
-	fmt.Println(shortPaths, "\n", longPaths)
 	if len(shortPaths) == 0 && len(longPaths) == 0 {
 		fmt.Println("ERROR: invalid path")
 		return
 	} else if len(shortPaths) >= len(longPaths) {
 		longPaths = shortPaths
 	}
+	functions.SortingPaths(&shortPaths)
+	functions.SortingPaths(&longPaths)
 	functions.PathAnts(&antFarm.Ants, &shortPaths, &longPaths, &finalPath, &numberPaths)
 	functions.PrintAnt(finalPath, numberPaths)
 }
